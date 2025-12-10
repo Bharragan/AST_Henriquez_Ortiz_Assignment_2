@@ -230,3 +230,35 @@ def residuals_normality_test(residuals):
     }
 
     return results
+
+
+
+def arma_forecast_plot2(model, X_train, X_test, steps=24, title='Forecast'):
+    """
+    Produce forecast and plot training data, test data, and forecast with confidence intervals.
+    """
+    forecast = model.get_forecast(steps=steps)
+    pred_mean = forecast.predicted_mean
+    conf_int = forecast.conf_int()  # DataFrame con columnas ['lower Value', 'upper Value']
+
+    # --- Plot ---
+    plt.figure(figsize=(9, 5))
+    plt.plot(range(len(X_train)), X_train, label='Training Data')
+    plt.plot(range(len(X_train), len(X_train)+steps), pred_mean, label='Forecast')
+
+    # Usar iloc para acceder a las columnas
+    plt.fill_between(range(len(X_train), len(X_train)+steps),
+                     conf_int.iloc[:, 0], conf_int.iloc[:, 1],
+                     alpha=0.3, label='95% CI')
+
+    # Graficar los datos reales de test
+    plt.plot(range(len(X_train), len(X_train)+len(X_test)), X_test, label='Actual Data')
+
+    plt.title(title)
+    plt.xlabel('Time Index')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    return pred_mean, conf_int
